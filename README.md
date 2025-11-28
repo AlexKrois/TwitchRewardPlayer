@@ -9,7 +9,8 @@ This script listens for **Twitch Channel Point Redemptions** and automatically p
 * Listens for specific Channel Point Redemptions
 * Plays the video, that was submitted in the Redemption in a Browser-Source
 * You can set a max. allowed time
-* It just plays a fucking video on OBS man 
+* It just plays a fucking video on OBS man
+* Just read the code, its literally so easy to understand
 
 https://github.com/user-attachments/assets/2ee7e84f-2e6f-4a0a-869a-1c0eb59900df
 
