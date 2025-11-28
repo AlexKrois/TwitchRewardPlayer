@@ -31,10 +31,6 @@ def is_youtube_url(url):
 
 
 def extract_start_time_seconds(url):
-    """
-    Extracts the start time in seconds from a YouTube URL with t= or start= parameter.
-    Supports formats like ?t=1m30s, ?t=90, ?start=45, etc.
-    """
     match = re.search(r"[?&](?:t|start)=(\d+m)?(\d+s?|\d+)?", url, re.IGNORECASE)
     if match:
         total = 0
@@ -82,14 +78,17 @@ def get_youtube_video_duration_seconds(video_id):
         seconds = int(match.group(6)) if match.group(6) else 0
         total_seconds = hours * 3600 + minutes * 60 + seconds
     else:
+        #max 40 seconds
         return 40
     return total_seconds
 
 
 async def listen_rewards():
-    #token = get_app_token()
-    headers = {"Client-ID": CLIENT_ID, "Authorization": f"Bearer {USER_ACCESS_TOKEN}"}
-
+    headers = {
+        "Client-ID": CLIENT_ID,
+        "Authorization": f"Bearer {USER_ACCESS_TOKEN}",
+        "Content-Type": "application/json",
+    }
     async with websockets.connect("wss://eventsub.wss.twitch.tv/ws") as ws:
         print("Connected to Twitch EventSub WebSocket.")
         session_id = None
@@ -111,7 +110,11 @@ async def listen_rewards():
                 }
                 if REWARD_ID:
                     sub_payload["condition"]["reward_id"] = REWARD_ID
-
+                test = requests.get(
+                    f"https://api.twitch.tv/helix/eventsub/subscriptions",
+                    headers=headers,
+                )
+                print("Current subscriptions:", test.json())
                 sub_resp = requests.post(
                     "https://api.twitch.tv/helix/eventsub/subscriptions",
                     headers={**headers, "Content-Type": "application/json"},
@@ -170,7 +173,7 @@ async def listen_rewards():
 
                 else:
                     print("Not a YouTube URL.")
-                print(f"{user} mit {embed_url} is done")
+                print(f"{user} with {embed_url} is done")
 
             elif data["metadata"]["message_type"] == "session_keepalive":
                 pass
