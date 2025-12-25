@@ -186,7 +186,8 @@ if __name__ == "__main__":
                 CHANNEL_ID = os.getenv("TWITCH_CHANNEL_ID")
                 USER_ACCESS_TOKEN = os.getenv("TWITCH_USER_TOKEN")
                 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
-                if os.getenv("REWARD_ID") is None:
+                REWARD_ID = os.getenv("REWARD_ID")
+                if REWARD_ID is None:
                     REWARD_ID = get_reward_id(input("Enter the reward title: "))
                     with open(".env", "a") as env_file:
                         env_file.write(f"\nREWARD_ID={REWARD_ID}\n")
