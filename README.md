@@ -44,9 +44,6 @@ https://github.com/user-attachments/assets/2ee7e84f-2e6f-4a0a-869a-1c0eb59900df
 ```
 YTVideo
 ```
-It doesn't matter what you set the name to, you will get asked about the name after.
-
-Also, if you've entered a wrong name you can delete the line REWARD_ID=xxxx in the .env file and you will get asked again.
 
 3. Set the URL to:
 
@@ -61,6 +58,12 @@ cl = obs.ReqClient(host="127.0.0.1", port=4444)
 172.26.32.1 is the default IP if you're on WSL.
 
 The port can be found in OBS (Tools -> Websocket Settings) - should be 4444 by default.
+
+5. On Twitch, add a Redemption, where people can write stuff -> Copy the name
+
+It doesn't matter what you set the name to, you will get asked about the name after.
+
+Also, if you've entered a wrong name you can delete the line REWARD_ID=xxxx in the .env file and you will get asked again.
 
 ---
 
