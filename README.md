@@ -45,6 +45,7 @@ https://github.com/user-attachments/assets/2ee7e84f-2e6f-4a0a-869a-1c0eb59900df
 YTVideo
 ```
 It doesn't matter what you set the name to, you will get asked about the name after.
+
 Also, if you've entered a wrong name you can delete the line REWARD_ID=xxxx in the .env file and you will get asked again.
 
 3. Set the URL to:
