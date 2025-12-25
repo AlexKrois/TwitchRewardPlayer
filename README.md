@@ -30,31 +30,35 @@ https://github.com/user-attachments/assets/2ee7e84f-2e6f-4a0a-869a-1c0eb59900df
 | `TWITCH_CLIENT_ID`     | https://dev.twitch.tv/console/apps                                         |
 | `TWITCH_CLIENT_SECRET` | https://dev.twitch.tv/console/apps                                         |
 | `TWITCH_CHANNEL_ID`    | https://api.ivr.fi/v2/twitch/user?id=&login=alexvcs change alexvcs         |
-| `TWITCH_USER_TOKEN`    | Figure it out by yourself lmao                                             |
-| `REWARD_ID`            | get_reward_id(reward_title)                                                |
-| `YOUTUBE_API_KEY`      | YouTube Data API v3 key                                                    |
+| `TWITCH_USER_TOKEN`    | https://dev.twitch.tv/docs/authentication/getting-tokens-oauth             |
+| `YOUTUBE_API_KEY`      | https://console.cloud.google.com/apis/api/youtube.googleapis.com/          |
 
 ---
 
 ## 🖥 Setup
 
-1. In OBS, add a **Browser Source** named exactly:
+1. Set every value in the .env file.
+
+2. In OBS, add a **Browser Source** named like:
 
 ```
 YTVideo
 ```
+It doesn't matter what you set the name to, you will get asked about the name after.
+Also, if you've entered a wrong name you can delete the line REWARD_ID=xxxx in the .env file and you will get asked again.
 
-2. Set the URL to:
+3. Set the URL to:
 
 ```
 file:///absolute/path/to/embed.html
 ```
 
-3. In main.py change the host and port to whatever you need:
+4. In main.py change the host and port to whatever you need:
 ```
-cl = obs.ReqClient(host="172.26.32.1", port=4444)
+cl = obs.ReqClient(host="127.0.0.1", port=4444)
 ```
-172.26.32.1 is the default if you're on WSL.
+172.26.32.1 is the default IP if you're on WSL.
+The port can be found in OBS (Tools -> Websocket Settings) - should be 4444 by default.
 
 ---
 

@@ -78,8 +78,7 @@ def get_youtube_video_duration_seconds(video_id):
         seconds = int(match.group(6)) if match.group(6) else 0
         total_seconds = hours * 3600 + minutes * 60 + seconds
     else:
-        #max 40 seconds
-        return 40
+        return MAX_VIDEO_DURATION_SECONDS
     return total_seconds
 
 
@@ -110,11 +109,7 @@ async def listen_rewards():
                 }
                 if REWARD_ID:
                     sub_payload["condition"]["reward_id"] = REWARD_ID
-                test = requests.get(
-                    f"https://api.twitch.tv/helix/eventsub/subscriptions",
-                    headers=headers,
-                )
-                print("Current subscriptions:", test.json())
+
                 sub_resp = requests.post(
                     "https://api.twitch.tv/helix/eventsub/subscriptions",
                     headers={**headers, "Content-Type": "application/json"},
@@ -141,8 +136,9 @@ async def listen_rewards():
                         if duration is None:
                             print("No duration")
                             continue
-                        if duration > 40:
-                            duration = 43
+                        if duration > MAX_VIDEO_DURATION_SECONDS:
+                            # Just to be safe, MAX + 2 seconds buffer 
+                            duration = MAX_VIDEO_DURATION_SECONDS + 3
                         else:
                             duration += 3
 
@@ -184,13 +180,21 @@ if __name__ == "__main__":
         try:
             cl = obs.ReqClient(host="172.26.32.1", port=4444)
 
-            env_file = dotenv.load_dotenv()
-            CLIENT_ID = os.getenv("TWITCH_CLIENT_ID")
-            CLIENT_SECRET = os.getenv("TWITCH_CLIENT_SECRET")
-            CHANNEL_ID = os.getenv("TWITCH_CHANNEL_ID")
-            USER_ACCESS_TOKEN = os.getenv("TWITCH_USER_TOKEN")
-            REWARD_ID = os.getenv("REWARD_ID")
-            YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
+            if dotenv.load_dotenv():
+                CLIENT_ID = os.getenv("TWITCH_CLIENT_ID")
+                CLIENT_SECRET = os.getenv("TWITCH_CLIENT_SECRET")
+                CHANNEL_ID = os.getenv("TWITCH_CHANNEL_ID")
+                USER_ACCESS_TOKEN = os.getenv("TWITCH_USER_TOKEN")
+                YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
+                if os.getenv("REWARD_ID") is None:
+                    REWARD_ID = get_reward_id(input("Enter the reward title: "))
+                    with open(".env", "a") as env_file:
+                        env_file.write(f"\nREWARD_ID={REWARD_ID}\n")
+            else:
+                raise Exception("Failed to load .env file")
+
+            MAX_VIDEO_DURATION_SECONDS = 45
+            
 
             asyncio.run(listen_rewards())
         except KeyboardInterrupt:
