@@ -59,6 +59,7 @@ file:///absolute/path/to/embed.html
 cl = obs.ReqClient(host="127.0.0.1", port=4444)
 ```
 172.26.32.1 is the default IP if you're on WSL.
+
 The port can be found in OBS (Tools -> Websocket Settings) - should be 4444 by default.
 
 ---
