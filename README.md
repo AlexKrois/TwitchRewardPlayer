@@ -44,6 +44,9 @@ https://github.com/user-attachments/assets/2ee7e84f-2e6f-4a0a-869a-1c0eb59900df
 ```
 YTVideo
 ```
+It doesn't matter what you set the name to, you will get asked about the name after.
+
+Also, if you've entered a wrong name you can delete the line REWARD_ID=xxxx in the .env file and you will get asked again.
 
 3. Set the URL to:
 
@@ -59,12 +62,6 @@ cl = obs.ReqClient(host="127.0.0.1", port=4444)
 
 The port can be found in OBS (Tools -> Websocket Settings) - should be 4444 by default.
 
-5. On Twitch, add a Redemption, where people can write stuff -> Copy the name
-
-It doesn't matter what you set the name to, you will get asked about the name after.
-
-Also, if you've entered a wrong name you can delete the line REWARD_ID=xxxx in the .env file and you will get asked again.
-
 ---
 
 ## ▶️ Running the script
@@ -75,18 +72,7 @@ Simply run:
 python3 main.py
 ```
 
-The script will:
-
-1. Connect to Twitch EventSub WebSocket
-2. Subscribe to redemptions
-3. Wait for viewer submissions
-4. When a YouTube link is submitted:
-
-   * Extract video ID & timestamp
-   * Get duration from YouTube API
-   * Create `embed.html`
-   * Show the video in OBS
-   * Hide it after playback
+If the redemption name has never been entered, the script will ask you for the name. Just paste it in.
 
 ---
 
