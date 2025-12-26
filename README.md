@@ -91,7 +91,7 @@ You can delete the line "REWARD_ID=xxxx" from the .env file, to get asked about 
 - BUFFER_TIME_SECONDS
   - Extra time as a buffer for OBS to load the browser source / video.
   - If set to 0, the video may get cut off at the end, because it took a couple of seconds in the beginning to load.
-  - If set to high, the finished video / browser source will stay visible on screen. 
+  - If set too high, the finished video / browser source will stay visible on screen. 
 
 ---
 
