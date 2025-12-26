@@ -37,16 +37,13 @@ https://github.com/user-attachments/assets/2ee7e84f-2e6f-4a0a-869a-1c0eb59900df
 
 ## 🖥 Setup
 
-1. Set every value in the .env file.
+1. Populate every value in the .env file correctly.
 
 2. In OBS, add a **Browser Source** named like:
 
 ```
 YTVideo
 ```
-It doesn't matter what you set the name to, you will get asked about the name after.
-
-Also, if you've entered a wrong name you can delete the line REWARD_ID=xxxx in the .env file and you will get asked again.
 
 3. Set the URL to:
 
@@ -55,12 +52,16 @@ file:///absolute/path/to/embed.html
 ```
 
 4. In main.py change the host and port to whatever you need:
+
+    **172.26.32.1** is the default IP if you're on **WSL**.
+
+    The **port** can be found in **OBS (Tools -> Websocket Settings)** - should be 4444 by default.
 ```
 cl = obs.ReqClient(host="127.0.0.1", port=4444)
 ```
-172.26.32.1 is the default IP if you're on WSL.
 
-The port can be found in OBS (Tools -> Websocket Settings) - should be 4444 by default.
+5. Create a redemption, that is **redeemable with user input** and copy / remember the name of it
+
 
 ---
 
@@ -72,30 +73,18 @@ Simply run:
 python3 main.py
 ```
 
-If the redemption name has never been entered, the script will ask you for the name. Just paste it in.
+If it's your first time running the script, you will be asked to enter the redemption name - just paste it in and press enter.
+
+You can delete the line "REWARD_ID=xxxx" from the .env file, to get asked about the redemption name again.
 
 ---
 
-## 🧪 Example Workflow
+## 🧪 Configurations
 
-Viewer redeems a reward with:
-
-```
-https://youtu.be/dQw4w9WgXcQ?t=43
-```
-
-Script does:
-
-* Extracts video ID: `dQw4w9WgXcQ`
-* Gets duration
-* Limits playback to ~40 seconds
-* Writes an embed iframe to `embed.html`
-* Shows the OBS browser source
-* Sleeps until video ends
-* Clears the file
-* Hides the browser source again
-
-No interaction needed on your side.
+- MAX_VIDEO_DURATION_SECONDS
+- - Maximum length of the video.
+- - If the video is shorter than MAX_VIDEO_DURATION_SECONDS, the whole video will play.
+- - If the video is longer than MAX_VIDEO_DURATION_SECONDS, the video will play for MAX_VIDEO_DURATION_SECONDS + 3 seconds (buffer time).
 
 ---
 
