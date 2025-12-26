@@ -137,7 +137,7 @@ async def listen_rewards():
                             print("No duration")
                             continue
                         if duration > MAX_VIDEO_DURATION_SECONDS:
-                            # Just to be safe, MAX + 2 seconds buffer 
+                            # Just to be safe, MAX + 3 seconds buffer
                             duration = MAX_VIDEO_DURATION_SECONDS + 3
                         else:
                             duration += 3
@@ -148,11 +148,9 @@ async def listen_rewards():
                         with open("embed.html", "w") as f:
                             f.write(embedding)
 
-                        
-                        
                         cl.set_scene_item_enabled(
-                            str(cl.get_current_program_scene().scene_name), # type: ignore
-                            cl.get_scene_item_id(str(cl.get_current_program_scene().scene_name), "YTVideo").scene_item_id,  # type: ignore
+                            str(cl.get_current_program_scene().scene_name),  # type: ignore
+                            cl.get_scene_item_id(str(cl.get_current_program_scene().scene_name), BROWSER_SOURCE_NAME).scene_item_id,  # type: ignore
                             True,
                         )
 
@@ -162,8 +160,8 @@ async def listen_rewards():
                             f.write("")
 
                         cl.set_scene_item_enabled(
-                            str(cl.get_current_program_scene().scene_name), # type: ignore
-                            cl.get_scene_item_id(str(cl.get_current_program_scene().scene_name), "YTVideo").scene_item_id,  # type: ignore
+                            str(cl.get_current_program_scene().scene_name),  # type: ignore
+                            cl.get_scene_item_id(str(cl.get_current_program_scene().scene_name), BROWSER_SOURCE_NAME).scene_item_id,  # type: ignore
                             False,
                         )
 
@@ -186,16 +184,25 @@ if __name__ == "__main__":
                 CHANNEL_ID = os.getenv("TWITCH_CHANNEL_ID")
                 USER_ACCESS_TOKEN = os.getenv("TWITCH_USER_TOKEN")
                 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
+                BROWSER_SOURCE_NAME = os.getenv("BROWSER_SOURCE_NAME")
                 REWARD_ID = os.getenv("REWARD_ID")
                 if REWARD_ID is None:
                     REWARD_ID = get_reward_id(input("Enter the reward title: "))
                     with open(".env", "a") as env_file:
                         env_file.write(f"\nREWARD_ID={REWARD_ID}\n")
+                if (
+                    CLIENT_ID is None
+                    or CLIENT_SECRET is None
+                    or CHANNEL_ID is None
+                    or USER_ACCESS_TOKEN is None
+                    or YOUTUBE_API_KEY is None
+                    or BROWSER_SOURCE_NAME is None
+                ):
+                    raise Exception("Missing required environment variables")
             else:
                 raise Exception("Failed to load .env file")
 
             MAX_VIDEO_DURATION_SECONDS = 45
-            
 
             asyncio.run(listen_rewards())
         except KeyboardInterrupt:

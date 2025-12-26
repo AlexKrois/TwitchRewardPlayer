@@ -32,6 +32,7 @@ https://github.com/user-attachments/assets/2ee7e84f-2e6f-4a0a-869a-1c0eb59900df
 | `TWITCH_CHANNEL_ID`    | https://api.ivr.fi/v2/twitch/user?id=&login=alexvcs change alexvcs         |
 | `TWITCH_USER_TOKEN`    | https://dev.twitch.tv/docs/authentication/getting-tokens-oauth             |
 | `YOUTUBE_API_KEY`      | https://console.cloud.google.com/apis/api/youtube.googleapis.com/          |
+| `BROWSER_SOURCE_NAME`  | Just the name of the browser source you create in OBS                      |
 
 ---
 
