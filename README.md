@@ -38,13 +38,13 @@ https://github.com/user-attachments/assets/2ee7e84f-2e6f-4a0a-869a-1c0eb59900df
 
 ## 🖥 Setup
 
-1. Populate every value in the .env file correctly.
-
-2. In OBS, add a **Browser Source** named like:
+1. In OBS, add a **Browser Source** named like:
 
 ```
 YTVideo
 ```
+
+2. Populate every value in the .env file correctly.
 
 3. Set the URL to:
 
