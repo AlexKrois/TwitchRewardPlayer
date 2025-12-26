@@ -137,10 +137,10 @@ async def listen_rewards():
                             print("No duration")
                             continue
                         if duration > MAX_VIDEO_DURATION_SECONDS:
-                            # Just to be safe, MAX + 3 seconds buffer
-                            duration = MAX_VIDEO_DURATION_SECONDS + 3
+                            # Just to be safe, MAX + BUFFER
+                            duration = MAX_VIDEO_DURATION_SECONDS + BUFFER_TIME_SECONDS
                         else:
-                            duration += 3
+                            duration += BUFFER_TIME_SECONDS
 
                         embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1&controls=0&start={extract_start_time_seconds(user_input)}&end={duration}"
 
@@ -203,6 +203,7 @@ if __name__ == "__main__":
                 raise Exception("Failed to load .env file")
 
             MAX_VIDEO_DURATION_SECONDS = 45
+            BUFFER_TIME_SECONDS = 3
 
             asyncio.run(listen_rewards())
         except KeyboardInterrupt:

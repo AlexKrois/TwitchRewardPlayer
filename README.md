@@ -83,9 +83,15 @@ You can delete the line "REWARD_ID=xxxx" from the .env file, to get asked about 
 ## 🧪 Configurations
 
 - MAX_VIDEO_DURATION_SECONDS
-- - Maximum length of the video.
-- - If the video is shorter than MAX_VIDEO_DURATION_SECONDS, the whole video will play.
-- - If the video is longer than MAX_VIDEO_DURATION_SECONDS, the video will play for MAX_VIDEO_DURATION_SECONDS + 3 seconds (buffer time).
+  - Maximum length of the video.
+  - If the video is shorter than MAX_VIDEO_DURATION_SECONDS, the whole video will play.
+  - If the video is longer than MAX_VIDEO_DURATION_SECONDS, the video will play for MAX_VIDEO_DURATION_SECONDS + 3 seconds (buffer time).
+
+
+- BUFFER_TIME_SECONDS
+  - Extra time as a buffer for OBS to load the browser source / video.
+  - If set to 0, the video may get cut off at the end, because it took a couple of seconds in the beginning to load.
+  - If set to high, the finished video / browser source will stay visible on screen. 
 
 ---
 
