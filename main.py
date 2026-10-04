@@ -3,10 +3,12 @@ import obsws_python as obs
 import asyncio
 import json
 import os
+import random
 import requests
 import websockets
 import re
 import dotenv
+import cv2
 
 
 def get_app_token():
@@ -98,6 +100,7 @@ async def listen_rewards():
 
             if data["metadata"]["message_type"] == "session_welcome":
                 session_id = data["payload"]["session"]["id"]
+                print(str(data))
 
                 sub_payload = {
                     "type": "channel.channel_points_custom_reward_redemption.add",
@@ -110,64 +113,198 @@ async def listen_rewards():
                 if REWARD_ID:
                     sub_payload["condition"]["reward_id"] = REWARD_ID
 
-                sub_resp = requests.post(
-                    "https://api.twitch.tv/helix/eventsub/subscriptions",
-                    headers={**headers, "Content-Type": "application/json"},
-                    data=json.dumps(sub_payload),
-                )
-                if sub_resp.status_code != 202:
-                    print("Subscription failed:", sub_resp.text)
+                    sub_resp = requests.post(
+                        "https://api.twitch.tv/helix/eventsub/subscriptions",
+                        headers={**headers, "Content-Type": "application/json"},
+                        data=json.dumps(sub_payload),
+                    )
+                    print("Subscription response:", sub_resp.status_code, sub_resp.text)
+                    if sub_resp.status_code != 202:
+                        print("Subscription failed:", sub_resp.text)
+                if DRACULA_REWARD_ID:
+                    sub_payload["condition"]["reward_id"] = DRACULA_REWARD_ID
+
+                    sub_resp = requests.post(
+                        "https://api.twitch.tv/helix/eventsub/subscriptions",
+                        headers={**headers, "Content-Type": "application/json"},
+                        data=json.dumps(sub_payload),
+                    )
+                    print("Subscription response:", sub_resp.status_code, sub_resp.text)
+                    if sub_resp.status_code != 202:
+                        print("Subscription failed:", sub_resp.text)
 
             elif data["metadata"]["message_type"] == "notification":
-                event = data["payload"]["event"]
-                user = event["user_name"]
-                user_input = event.get("user_input", "")
-                embed_url = ""
+                print(data)
+                print(data["payload"]["subscription"]["condition"]["reward_id"])
+                if data["payload"]["subscription"]["condition"]["reward_id"] == REWARD_ID:
+                    event = data["payload"]["event"]
+                    print(data)
+                    user = event["user_name"]
+                    user_input = event.get("user_input", "")
+                    embed_url = ""
 
-                if is_youtube_url(user_input):
-                    yt_match = re.search(
-                        r"(?:v=|youtu\.be/|embed/|shorts/)([A-Za-z0-9_\-]{11})",
-                        user_input,
+                    if is_youtube_url(user_input):
+                        yt_match = re.search(
+                            r"(?:v=|youtu\.be/|embed/|shorts/)([A-Za-z0-9_\-]{11})",
+                            user_input,
+                        )
+                        if yt_match:
+                            video_id = yt_match.group(1)
+
+                            duration = get_youtube_video_duration_seconds(video_id)
+                            if duration is None:
+                                print("No duration")
+                                continue
+                            if duration > MAX_VIDEO_DURATION_SECONDS:
+                                # Just to be safe, MAX + BUFFER
+                                duration = MAX_VIDEO_DURATION_SECONDS + BUFFER_TIME_SECONDS
+                            else:
+                                duration += BUFFER_TIME_SECONDS
+
+                            embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1&controls=0&start={extract_start_time_seconds(user_input)}&end={duration}"
+
+                            embedding = f'<iframe src="{embed_url}" title="YouTube video player" frameborder="0" allow="encrypted-media; autoplay" referrerpolicy="strict-origin-when-cross-origin" style="width:100vw; height:100vh; position:fixed; top:0; left:0; border:none; z-index:9999;" allowfullscreen></iframe>'
+                            with open("embed.html", "w") as f:
+                                f.write(embedding)
+
+                            cl.set_scene_item_enabled(
+                                str(cl.get_current_program_scene().scene_name),  # type: ignore
+                                cl.get_scene_item_id(str(cl.get_current_program_scene().scene_name), BROWSER_SOURCE_NAME).scene_item_id,  # type: ignore
+                                True,
+                            )
+
+                            time.sleep(duration)
+
+                            with open("embed.html", "w") as f:
+                                f.write("")
+
+                            cl.set_scene_item_enabled(
+                                str(cl.get_current_program_scene().scene_name),  # type: ignore
+                                cl.get_scene_item_id(str(cl.get_current_program_scene().scene_name), BROWSER_SOURCE_NAME).scene_item_id,  # type: ignore
+                                False,
+                            )
+
+                    else:
+                        print("Not a YouTube URL.")
+                    print(f"{user} with {embed_url} is done")
+
+                if data["payload"]["subscription"]["condition"]["reward_id"] == DRACULA_REWARD_ID:
+                    event = data["payload"]["event"]
+                    user = event["user_name"]
+
+                    dracula_folder = "Dracula"
+
+                    video_files = [
+                        filename
+                        for filename in os.listdir(dracula_folder)
+                        if filename.lower().endswith(
+                            (".mp4", ".webm", ".mov", ".m4v")
+                        )
+                    ]
+
+                    print(
+                        f"Found {len(video_files)} video(s) "
+                        f"in {dracula_folder!r}."
                     )
-                    if yt_match:
-                        video_id = yt_match.group(1)
 
-                        duration = get_youtube_video_duration_seconds(video_id)
-                        if duration is None:
-                            print("No duration")
-                            continue
-                        if duration > MAX_VIDEO_DURATION_SECONDS:
-                            # Just to be safe, MAX + BUFFER
-                            duration = MAX_VIDEO_DURATION_SECONDS + BUFFER_TIME_SECONDS
-                        else:
-                            duration += BUFFER_TIME_SECONDS
+                    if not video_files:
+                        print(f"No videos found in {dracula_folder!r}.")
+                        continue
 
-                        embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1&controls=0&start={extract_start_time_seconds(user_input)}&end={duration}"
+                    # -----------------------------
+                    # Pick random video
+                    # -----------------------------
 
-                        embedding = f'<iframe src="{embed_url}" title="YouTube video player" frameborder="0" allow="encrypted-media; autoplay" referrerpolicy="strict-origin-when-cross-origin" style="width:100vw; height:100vh; position:fixed; top:0; left:0; border:none; z-index:9999;" allowfullscreen></iframe>'
-                        with open("embed.html", "w") as f:
-                            f.write(embedding)
+                    random_video = random.choice(video_files)
 
-                        cl.set_scene_item_enabled(
-                            str(cl.get_current_program_scene().scene_name),  # type: ignore
-                            cl.get_scene_item_id(str(cl.get_current_program_scene().scene_name), BROWSER_SOURCE_NAME).scene_item_id,  # type: ignore
-                            True,
-                        )
+                    video_path = os.path.abspath(
+                        os.path.join(dracula_folder, random_video)
+                    )
 
-                        time.sleep(duration)
+                    # -----------------------------
+                    # Get video duration
+                    # -----------------------------
 
-                        with open("embed.html", "w") as f:
-                            f.write("")
+                    video_capture = cv2.VideoCapture(video_path)
 
-                        cl.set_scene_item_enabled(
-                            str(cl.get_current_program_scene().scene_name),  # type: ignore
-                            cl.get_scene_item_id(str(cl.get_current_program_scene().scene_name), BROWSER_SOURCE_NAME).scene_item_id,  # type: ignore
-                            False,
-                        )
+                    fps = video_capture.get(cv2.CAP_PROP_FPS)
+                    frame_count = video_capture.get(cv2.CAP_PROP_FRAME_COUNT)
 
-                else:
-                    print("Not a YouTube URL.")
-                print(f"{user} with {embed_url} is done")
+                    video_capture.release()
+
+                    video_duration = (
+                        frame_count / fps
+                        if fps > 0 and frame_count > 0
+                        else MAX_VIDEO_DURATION_SECONDS
+                    )
+
+                    print(f"{user} redeemed Dracula")
+                    print(f"Selected: {random_video}")
+                    print(f"Duration: {video_duration:.2f}s")
+
+                    # -----------------------------
+                    # Set OBS Media Source file
+                    # -----------------------------
+
+                    cl.set_input_settings(
+                        DRACULA_SOURCE_NAME,
+                        {
+                            "local_file": video_path,
+                            "is_local_file": True
+                        },
+                        True
+                    )
+
+                    # -----------------------------
+                    # Find source in current scene
+                    # -----------------------------
+
+                    scene_name = str(
+                        cl.get_current_program_scene().scene_name # type: ignore
+                    )
+
+                    scene_item_id = cl.get_scene_item_id(
+                        scene_name,
+                        DRACULA_SOURCE_NAME
+                    ).scene_item_id # type: ignore
+
+                    # -----------------------------
+                    # Show + play
+                    # -----------------------------
+
+                    cl.set_scene_item_enabled(
+                        scene_name,
+                        scene_item_id,
+                        True
+                    )
+
+                    cl.trigger_media_input_action(
+                        DRACULA_SOURCE_NAME,
+                        "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART"
+                    )
+
+                    # -----------------------------
+                    # Wait for clip
+                    # -----------------------------
+
+                    time.sleep(
+                        video_duration + BUFFER_TIME_SECONDS
+                    )
+
+                    # -----------------------------
+                    # Hide source
+                    # -----------------------------
+
+                    cl.set_scene_item_enabled(
+                        scene_name,
+                        scene_item_id,
+                        False
+                    )
+
+                    print(
+                        f"{user}: finished playing {random_video}"
+                    )
+
 
             elif data["metadata"]["message_type"] == "session_keepalive":
                 pass
@@ -176,7 +313,7 @@ async def listen_rewards():
 if __name__ == "__main__":
     while True:
         try:
-            cl = obs.ReqClient(host="172.26.32.1", port=4444)
+            cl = obs.ReqClient(host="192.168.178.74",port=4444)
 
             if dotenv.load_dotenv():
                 CLIENT_ID = os.getenv("TWITCH_CLIENT_ID")
@@ -185,7 +322,10 @@ if __name__ == "__main__":
                 USER_ACCESS_TOKEN = os.getenv("TWITCH_USER_TOKEN")
                 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
                 BROWSER_SOURCE_NAME = os.getenv("BROWSER_SOURCE_NAME")
+                DRACULA_SOURCE_NAME = os.getenv("DRACULA_SOURCE_NAME")
                 REWARD_ID = os.getenv("REWARD_ID")
+                DRACULA_REWARD_ID = os.getenv("DRACULA_REWARD_ID")
+                print(get_app_token())
                 if REWARD_ID is None:
                     REWARD_ID = get_reward_id(input("Enter the reward title: "))
                     with open(".env", "a") as env_file:
